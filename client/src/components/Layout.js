@@ -7,7 +7,7 @@ const Layout = () => {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -15,154 +15,121 @@ const Layout = () => {
   };
 
   const navigation = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Clubs', path: '/clubs', roles: ['clubowner', 'admin'] },
-    { name: 'Lost & Found', path: '/lost-found' },
-    { name: 'Study Groups', path: '/study-groups' },
-    { name: 'Exam Trends', path: '/exam-trends' },
-    { name: 'AI Doc Reader', path: '/doc-reader' },
-    { name: 'Activities', path: '/activities' },
-    { name: 'SmartSell', path: '/smart-sell' }
+    { name: 'Dashboard', path: '/dashboard', icon: '📊' },
+    { name: 'Clubs', path: '/clubs', icon: '🏢' },
+    { name: 'Lost & Found', path: '/lost-found', icon: '🔍' },
+    { name: 'Study Groups', path: '/study-groups', icon: '📚' },
+    { name: 'Exam Trends', path: '/exam-trends', icon: '📈' },
+    { name: 'AI Doc Reader', path: '/doc-reader', icon: '🤖' },
+    { name: 'Activities', path: '/activities', icon: '🎮' },
+    { name: 'SmartSell', path: '/smart-sell', icon: '🛍️' }
   ];
 
-  // Filter navigation based on user roles
-  const filteredNavigation = navigation.filter(item => {
-    // If no roles are required for this item, show it
-    if (!item.roles) return true;
-    
-    // If roles are required but user has no roles, hide it
-    if (!user?.roles) return false;
-    
-    // Show if user has any of the required roles
-    return item.roles.some(role => user.roles.includes(role));
-  });
-
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              {/* Logo */}
-              <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-gray-800 dark:text-white">Campus Connect</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      {/* Sidebar */}
+      <div 
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transform transition-transform duration-200 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:relative md:translate-x-0`}
+      >
+        {/* Logo Section */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+          <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text">
+            Campus Connect
+          </span>
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="mt-4 px-2 space-y-1">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                  isActive
+                    ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`
+              }
+            >
+              <span className="text-xl mr-3">{item.icon}</span>
+              {item.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Bottom Section */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                {user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
-
-              {/* Desktop Navigation */}
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {filteredNavigation.map(item => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    className={({ isActive }) =>
-                      `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                        isActive
-                          ? 'border-indigo-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                      }`
-                    }
-                  >
-                    {item.name}
-                  </NavLink>
-                ))}
-              </div>
+              <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                {user?.email}
+              </span>
             </div>
-
-            {/* User Menu */}
-            <div className="hidden sm:ml-6 sm:flex sm:items-center">
-              <div className="ml-3 relative">
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">{user?.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-sm text-red-600 hover:text-red-800"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="flex items-center sm:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <span className="sr-only">Open main menu</span>
-                {/* Icon */}
-                <svg
-                  className="h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Theme Toggle Button */}
+          </div>
+          <div className="flex items-center justify-between">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-              aria-label="Toggle Theme"
             >
-              {isDark ? (
-                <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
+              {isDark ? '🌞' : '🌙'}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Logout
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
-              {filteredNavigation.map(item => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                      isActive
-                        ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                    }`
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-red-600 hover:bg-gray-50 hover:border-gray-300"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-transparent bg-clip-text">
+            Campus Connect
+          </span>
+          <div className="w-6" /> {/* Spacer for centering */}
+        </div>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="py-6 px-4 sm:px-6 lg:px-8">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
