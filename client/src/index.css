@@ -9,4 +9,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode transitions */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Dark mode scrollbar */
+html.dark {
+  color-scheme: dark;
 } 
